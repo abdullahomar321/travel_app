@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:travel_app/document_logic//fetch_docs.dart';
 import 'dart:io';
+import 'package:provider/provider.dart';
+import 'package:travel_app/providers/theme_provider.dart';
 
 class YourDocsScreen extends StatelessWidget {
   const YourDocsScreen({super.key});
@@ -30,6 +32,8 @@ class YourDocsScreen extends StatelessWidget {
       );
     }
 
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -51,13 +55,13 @@ class YourDocsScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.blue,
-              Colors.purple,
+              themeProvider.primaryColor,
+              themeProvider.secondaryColor,
             ],
           ),
         ),

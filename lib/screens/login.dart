@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:travel_app/firebase_logic/login_check.dart';
 import 'package:travel_app/firebase_logic/firestore.dart';
 import 'package:travel_app/screens/dashboard.dart';
+import 'package:travel_app/screens/signup.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Premium Blue/Purple Gradient Background
+    // Premium Cobalt Blue Gradient Background
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -48,8 +49,8 @@ class _LoginScreenState extends State<LoginScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.blue,
-              Colors.purple,
+              Color(0xFF0047AB), // Cobalt Blue
+              Color(0xFF002E6D), // Darker Cobalt
             ],
           ),
         ),
@@ -156,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: Colors.purple,
+                            foregroundColor: const Color(0xFF0047AB), // Cobalt Blue Text
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -190,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     GestureDetector(
                       onTap: () {
                         Navigator.push(context, 
-                            MaterialPageRoute(builder: (context)=>LoginScreen()));
+                            MaterialPageRoute(builder: (context)=>SignupScreen()));
                       },
                       child: const Text(
                         "Signup",

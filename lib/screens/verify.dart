@@ -54,8 +54,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.blue,
-              Colors.purple,
+              Color(0xFF0047AB), // Cobalt Blue
+              Color(0xFF002E6D), // Darker Cobalt
             ],
           ),
         ),
@@ -186,7 +186,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: Colors.purple,
+                            foregroundColor: const Color(0xFF0047AB),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -237,7 +237,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: Colors.purple,
+                            foregroundColor: const Color(0xFF0047AB), // Cobalt Blue
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),

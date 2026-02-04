@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:travel_app/firebase_logic/delete_account.dart';
 import 'package:travel_app/screens/change_password.dart';
+import 'package:provider/provider.dart';
+import 'package:travel_app/providers/theme_provider.dart';
 import 'package:travel_app/screens/home.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -14,6 +15,8 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -31,13 +34,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.blue,
-              Colors.purple,
+              themeProvider.primaryColor,
+              themeProvider.secondaryColor,
             ],
           ),
         ),
@@ -58,11 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                _buildSettingsTile(
-                  title: 'Log Out',
-                  icon: Icons.logout,
-                  onTap: _showLogoutConfirmationDialog,
-                ),
+                const SizedBox(height: 16),
                 const SizedBox(height: 16),
                 _buildSettingsTile(
                   title: 'Delete Account',
@@ -78,36 +77,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showLogoutConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white.withOpacity(0.9),
-          title: const Text('Log Out'),
-          content: const Text('Are you sure you want to log out?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                if (context.mounted) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => const TravShareHomeScreen()),
-                        (route) => false,
-                  );
-                }
-              },
-              child: const Text('Log Out', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        );
-      },
-    );
-  }
+
 
   void _showDeleteAccountConfirmationDialog() {
     showDialog(

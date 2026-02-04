@@ -4,6 +4,8 @@ import 'package:travel_app/document_logic/expiration.dart';
 import 'dart:io';
 import 'package:travel_app/document_logic/image_upload.dart';
 import 'package:travel_app/firebase_logic/fetchfamily.dart';
+import 'package:provider/provider.dart';
+import 'package:travel_app/providers/theme_provider.dart';
 import 'package:travel_app/document_logic/save_document.dart';
 
 class CreateDocumentUI extends StatefulWidget {
@@ -43,7 +45,7 @@ class _CreateDocumentUIState extends State<CreateDocumentUI> {
       _isLoadingMembers = true;
     });
 
-    final stream = FamilyMembersService.getFamilyMembersStream(widget.userId);
+    final stream = FamilyCRUDService.getFamilyMembersStream(widget.userId);
     stream.listen((members) {
       if (mounted) {
         setState(() {
@@ -75,17 +77,19 @@ class _CreateDocumentUIState extends State<CreateDocumentUI> {
   }
 
   Future<void> _pickAndUploadImage() async {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+
     final source = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF2196F3), Color(0xFF9C27B0)],
+            colors: [themeProvider.primaryColor, themeProvider.secondaryColor],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -224,9 +228,11 @@ class _CreateDocumentUIState extends State<CreateDocumentUI> {
 
   @override
   Widget build(BuildContext context) {
-    const gradientDecoration = BoxDecoration(
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    final gradientDecoration = BoxDecoration(
       gradient: LinearGradient(
-        colors: [Color(0xFF2196F3), Color(0xFF9C27B0)],
+        colors: [themeProvider.primaryColor, themeProvider.secondaryColor],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -365,7 +371,7 @@ class _CreateDocumentUIState extends State<CreateDocumentUI> {
                             onPressed: _isSaving ? null : _createDocument,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: Colors.purple,
+                              foregroundColor: const Color(0xFF0047AB), // Cobalt Blue
                               disabledBackgroundColor: Colors.white.withOpacity(0.3),
                               elevation: 2,
                               shape: RoundedRectangleBorder(
@@ -378,7 +384,7 @@ class _CreateDocumentUIState extends State<CreateDocumentUI> {
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.purple),
+                                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0047AB)),
                               ),
                             )
                                 : const Text(
