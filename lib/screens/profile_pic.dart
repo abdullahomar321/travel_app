@@ -128,7 +128,7 @@ class _ProfilePictureDialogState extends State<ProfilePictureDialog> {
       builder: (context) => Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF2196F3), Color(0xFF9C27B0)],
+            colors: [Color(0xFF0047AB), Color(0xFF002E6D)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -162,7 +162,7 @@ class _ProfilePictureDialogState extends State<ProfilePictureDialog> {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF2196F3), Color(0xFF9C27B0)],
+            colors: [Color(0xFF0047AB), Color(0xFF002E6D)], // Cobalt Blue Gradient
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -181,7 +181,6 @@ class _ProfilePictureDialogState extends State<ProfilePictureDialog> {
             ),
             const SizedBox(height: 24),
 
-            // Current image or placeholder
             Container(
               width: 150,
               height: 150,

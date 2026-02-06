@@ -5,14 +5,13 @@ class FirestoreService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Save user details and create Firebase Auth account
+
   static Future<Map<String, dynamic>> saveUserDetails({
     required String email,
     required String username,
     required String password,
   }) async {
     try {
-      // Step 1: Check if username already exists
       final usernameCheck = await _firestore
           .collection('users')
           .where('username', isEqualTo: username)
@@ -41,7 +40,6 @@ class FirestoreService {
         };
       }
 
-      // Step 3: Save user details to Firestore with userId as document ID
       await _firestore.collection('users').doc(userId).set({
         'email': email,
         'username': username,
@@ -86,13 +84,11 @@ class FirestoreService {
     }
   }
 
-  /// Validate user login and sign in with Firebase Auth
   static Future<Map<String, dynamic>> validateAndSignIn({
     required String username,
     required String password,
   }) async {
     try {
-      // Step 1: Find user by username in Firestore
       final querySnapshot = await _firestore
           .collection('users')
           .where('username', isEqualTo: username)
