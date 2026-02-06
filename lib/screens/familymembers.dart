@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:travel_app/firebase_logic/fetchfamily.dart';
 import 'package:travel_app/providers/theme_provider.dart';
 
-
 class FamilyMembersScreen extends StatelessWidget {
   final String userId;
 
@@ -47,11 +46,12 @@ class FamilyMembersScreen extends StatelessWidget {
                   child: CircularProgressIndicator(color: Colors.white),
                 );
               }
+
               if (snapshot.hasError) {
-                return Center(
+                return const Center(
                   child: Text(
                     'Error loading family members',
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white),
                   ),
                 );
               }
@@ -67,21 +67,13 @@ class FamilyMembersScreen extends StatelessWidget {
                 );
               }
 
-              return CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.all(16),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                          final member = familyMembers[index];
-                          return _buildFamilyMemberTile(context, member);
-                        },
-                        childCount: familyMembers.length,
-                      ),
-                    ),
-                  ),
-                ],
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: familyMembers.length,
+                itemBuilder: (context, index) {
+                  final member = familyMembers[index];
+                  return _buildFamilyMemberTile(context, member);
+                },
               );
             },
           ),
@@ -90,9 +82,8 @@ class FamilyMembersScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFamilyMemberTile(BuildContext context, Map<String, dynamic> member) {
-    // Replaced with Dismissible for swipe-to-delete or just a trailing delete icon for "Control"
-    // User asked for "Control over creation and deleting"
+  Widget _buildFamilyMemberTile(
+      BuildContext context, Map<String, dynamic> member) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -111,7 +102,8 @@ class FamilyMembersScreen extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        contentPadding:
+        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         leading: CircleAvatar(
           backgroundColor: Colors.purple.withOpacity(0.5),
           child: Text(
@@ -144,21 +136,19 @@ class FamilyMembersScreen extends StatelessWidget {
           icon: const Icon(Icons.delete_outline, color: Colors.white70),
           onPressed: () => _confirmDelete(context, member['id']),
         ),
-        onTap: () {
-          // Future: Edit member details?
-        },
       ),
     );
   }
 
   void _confirmDelete(BuildContext context, String? memberId) {
     if (memberId == null) return;
-    
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Member'),
-        content: const Text('Are you sure you want to remove this family member?'),
+        content:
+        const Text('Are you sure you want to remove this family member?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -167,9 +157,13 @@ class FamilyMembersScreen extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              await FamilyCRUDService.deleteFamilyMember(userId: userId, memberId: memberId);
+              await FamilyCRUDService.deleteFamilyMember(
+                userId: userId,
+                memberId: memberId,
+              );
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child:
+            const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

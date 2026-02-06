@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +10,8 @@ import 'package:travel_app/screens/home.dart';
 import 'package:travel_app/screens/settings.dart';
 import 'package:travel_app/screens/your_docs.dart';
 import 'package:travel_app/screens/add_family_member.dart';
+import 'package:travel_app/screens/profile_pic.dart';
+import 'package:travel_app/firebase_logic/profile_service.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -27,7 +30,7 @@ class Dashboard extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          'TravShare',
+          'TripTation',
           style: TextStyle(
             color: Colors.white,
             fontSize: 22,
@@ -76,21 +79,20 @@ class Dashboard extends StatelessWidget {
                 ),
               ),
 
-              // Dashboard Grid
               Expanded(
                 child: GridView.count(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 0.85, // Taller cards for elegance
+                  childAspectRatio: 0.85,
                   children: [
                     _DashboardGlassCard(
                       icon: Icons.family_restroom_rounded,
                       label: 'Family Members',
                       subLabel: 'View list',
                       onTap: () {
-                         _navigateTo(context, (userId) => FamilyMembersScreen(userId: userId));
+                        _navigateTo(context, (userId) => FamilyMembersScreen(userId: userId));
                       },
                     ),
                     _DashboardGlassCard(
@@ -98,11 +100,11 @@ class Dashboard extends StatelessWidget {
                       label: 'Your Docs',
                       subLabel: 'View & share',
                       onTap: () {
-                        _navigateTo(context, (userId) => YourDocsScreen());
+                        _navigateTo(context, (userId) => const YourDocsScreen());
                       },
                     ),
                     _DashboardGlassCard(
-                      icon: Icons.create_new_folder_rounded, // Changed icon for better semantics
+                      icon: Icons.create_new_folder_rounded,
                       label: 'Create Doc',
                       subLabel: 'Upload new',
                       onTap: () {
@@ -143,26 +145,65 @@ class Dashboard extends StatelessWidget {
 
   Widget _buildDrawer(BuildContext context, ThemeProvider themeProvider) {
     final user = FirebaseAuth.instance.currentUser;
+
     return Drawer(
       child: Container(
         color: Colors.white,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            UserAccountsDrawerHeader(
-              decoration: BoxDecoration(
-                color: themeProvider.primaryColor,
-              ),
-              accountName: const Text(
-                'TravShare',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-              accountEmail: Text(user?.email ?? 'No Email'),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, size: 40, color: themeProvider.primaryColor),
-              ),
+            // Profile Picture Header with StreamBuilder
+            StreamBuilder<String?>(
+              stream: user != null
+                  ? ProfileService.profilePictureStream(user.uid)
+                  : Stream.value(null),
+              builder: (context, snapshot) {
+                final profilePicturePath = snapshot.data;
+
+                return UserAccountsDrawerHeader(
+                  decoration: BoxDecoration(
+                    color: themeProvider.primaryColor,
+                  ),
+                  accountName: const Text(
+                    'TripTation',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  accountEmail: Text(user?.email ?? 'No Email'),
+                  currentAccountPicture: GestureDetector(
+                    onTap: () async {
+                      Navigator.pop(context); // Close drawer
+
+                      final result = await showDialog(
+                        context: context,
+                        builder: (context) => ProfilePictureDialog(
+                          currentImagePath: profilePicturePath,
+                        ),
+                      );
+
+                      // Dialog returns true if picture was updated
+                      // StreamBuilder will automatically update the avatar
+                    },
+                    child: Hero(
+                      tag: 'profile_avatar',
+                      child: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        backgroundImage: profilePicturePath != null &&
+                            profilePicturePath.isNotEmpty &&
+                            File(profilePicturePath).existsSync()
+                            ? FileImage(File(profilePicturePath))
+                            : null,
+                        child: profilePicturePath == null ||
+                            profilePicturePath.isEmpty ||
+                            !File(profilePicturePath).existsSync()
+                            ? Icon(Icons.person, size: 40, color: themeProvider.primaryColor)
+                            : null,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
+
             _buildDrawerItem(Icons.settings_outlined, 'Account Settings', () {
               Navigator.pop(context);
               Navigator.push(
@@ -170,6 +211,7 @@ class Dashboard extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
             }, themeProvider.primaryColor),
+
             ExpansionTile(
               leading: Icon(Icons.palette_outlined, color: themeProvider.primaryColor),
               title: const Text('Appearance'),
@@ -180,7 +222,9 @@ class Dashboard extends StatelessWidget {
                 _buildThemeOption(context, themeProvider, 'Dark Elegant', Colors.black87),
               ],
             ),
+
             const Divider(),
+
             _buildDrawerItem(Icons.logout_rounded, 'Log Out', () async {
               final shouldLogout = await showDialog<bool>(
                 context: context,
@@ -188,8 +232,17 @@ class Dashboard extends StatelessWidget {
                   title: const Text('Log Out'),
                   content: const Text('Are you sure you want to log out?'),
                   actions: [
-                    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-                    TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Log Out', style: TextStyle(color: Colors.red))),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text(
+                        'Log Out',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -213,7 +266,13 @@ class Dashboard extends StatelessWidget {
   Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap, Color color) {
     return ListTile(
       leading: Icon(icon, color: color),
-      title: Text(title, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w500)),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.black87,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
       onTap: onTap,
     );
   }
@@ -223,7 +282,9 @@ class Dashboard extends StatelessWidget {
       leading: Icon(Icons.circle, color: color, size: 18),
       title: Text(name),
       onTap: () => provider.setTheme(color),
-      trailing: provider.primaryColor == color ? const Icon(Icons.check, color: Colors.green) : null,
+      trailing: provider.primaryColor == color
+          ? const Icon(Icons.check, color: Colors.green)
+          : null,
     );
   }
 }
@@ -254,13 +315,23 @@ class _DashboardGlassCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.12),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.5),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.25),
+                width: 1.5,
+              ),
               boxShadow: [
+                // Base elevation
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withOpacity(0.06),
                   blurRadius: 10,
-                  spreadRadius: 1,
-                )
+                  offset: const Offset(0, 6),
+                ),
+                // Subtle neon elevation (edge glow)
+                BoxShadow(
+                  color: const Color(0xFF4DA6FF).withOpacity(0.18),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                ),
               ],
             ),
             padding: const EdgeInsets.all(24),
@@ -285,6 +356,7 @@ class _DashboardGlassCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 4),
                 Text(

@@ -57,32 +57,42 @@ class _TravShareHomeScreenState extends State<TravShareHomeScreen> {
               borderRadius: BorderRadius.circular(20.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
+                  color: const Color(0xFF4DA6FF).withOpacity(0.8),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+                BoxShadow(
+                  color: const Color(0xFF4DA6FF).withOpacity(0.4),
+                  blurRadius: 25,
+                  spreadRadius: 5,
+                ),
+                BoxShadow(
+                  color: const Color(0xFF0047AB).withOpacity(0.3),
+                  blurRadius: 40,
+                  spreadRadius: 10,
                 ),
               ],
             ),
             child: const Column(
               children: [
                 Icon(
-                  Icons.flight_takeoff,
+                  Icons.flight_takeoff_sharp,
                   size: 60,
                   color: Color(0xFF0047AB), // Cobalt Blue Icon
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'TravShare',
+                  'TripTation',
                   style: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
+                    letterSpacing: 0,
                     color: Color(0xFF0047AB), // Cobalt Blue Text
                   ),
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'TRAVEL DOCUMENTS',
+                  'YOUR TRAVEL DOCUMENTS',
                   style: TextStyle(
                     fontSize: 12,
                     letterSpacing: 3.0,

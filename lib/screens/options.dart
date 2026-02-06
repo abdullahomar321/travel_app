@@ -40,13 +40,13 @@ class _OptionsState extends State<Options> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
-                  Icons.flight_takeoff,
+                  Icons.flight_takeoff_sharp,
                   size: 80,
                   color: Colors.white,
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'TravShare',
+                  'TripTation',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -56,14 +56,34 @@ class _OptionsState extends State<Options> {
                 ),
                 const SizedBox(height: 60),
 
-                // Sign Up Button (Primary Action - White)
-                SizedBox(
+                // Sign Up Button (White with Neon Glow)
+                Container(
                   width: buttonWidth,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF4DA6FF).withOpacity(0.8),
+                        blurRadius: 12,
+                        spreadRadius: 1,
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF4DA6FF).withOpacity(0.4),
+                        blurRadius: 28,
+                        spreadRadius: 6,
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF0047AB).withOpacity(0.3),
+                        blurRadius: 45,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF0047AB), // Contrast Text
-                      elevation: 5,
+                      foregroundColor: const Color(0xFF0047AB),
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -72,7 +92,9 @@ class _OptionsState extends State<Options> {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => SignupScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => SignupScreen(),
+                        ),
                       );
                     },
                     child: const Text(
@@ -86,14 +108,45 @@ class _OptionsState extends State<Options> {
                 ),
                 const SizedBox(height: 20),
 
-                // Log In Button (Secondary Action - Text Only)
-                SizedBox(
+                // Log In Button (White with Neon Glow)
+                Container(
                   width: buttonWidth,
-                  child: TextButton(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF4DA6FF).withOpacity(0.8),
+                        blurRadius: 12,
+                        spreadRadius: 1,
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF4DA6FF).withOpacity(0.4),
+                        blurRadius: 28,
+                        spreadRadius: 6,
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF0047AB).withOpacity(0.3),
+                        blurRadius: 45,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF0047AB),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => LoginScreen(),
+                        ),
                       );
                     },
                     child: const Text(
@@ -101,12 +154,12 @@ class _OptionsState extends State<Options> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 40), // Bottom spacing
+
+                const SizedBox(height: 40),
               ],
             ),
           ),
