@@ -6,6 +6,7 @@ import 'package:travel_app/providers/splash_provider.dart';
 import 'package:travel_app/providers/theme_provider.dart';
 import 'package:travel_app/screens/home.dart';
 import 'package:travel_app/screens/dashboard.dart';
+import 'package:travel_app/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,8 +58,7 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         // Show loading while checking auth state
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-          );
+          return const SplashScreen();
         }
 
         if (snapshot.hasData && snapshot.data != null) {

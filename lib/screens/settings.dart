@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:travel_app/firebase_logic/delete_account.dart';
-import 'package:travel_app/screens/change_password.dart';
 import 'package:provider/provider.dart';
+import 'package:travel_app/firebase_logic/delete_account.dart';
 import 'package:travel_app/providers/theme_provider.dart';
+import 'package:travel_app/screens/change_password.dart';
 import 'package:travel_app/screens/home.dart';
+import 'package:flutter/material.dart';
+import 'package:travel_app/widgets/graphical_elements.dart';
+import 'dart:ui';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -19,65 +21,101 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Settings',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              themeProvider.primaryColor,
-              themeProvider.secondaryColor,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                _buildSettingsTile(
-                  title: 'Change Password',
-                  icon: Icons.lock_reset,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ChangePasswordScreen()),
-                    );
-                  },
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: AppBar(
+              backgroundColor: Colors.white.withOpacity(0.1),
+              elevation: 0,
+              centerTitle: true,
+              title: const Text(
+                'Settings',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                  letterSpacing: 0.5,
                 ),
-                const SizedBox(height: 16),
-                const SizedBox(height: 16),
-                const SizedBox(height: 16),
-                _buildSettingsTile(
-                  title: 'Delete Account',
-                  icon: Icons.delete_forever_outlined,
-                  isDestructive: true,
-                  onTap: _showDeleteAccountConfirmationDialog,
+              ),
+              iconTheme: const IconThemeData(color: Colors.white),
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      themeProvider.primaryColor.withOpacity(0.7),
+                      themeProvider.primaryColor.withOpacity(0.3),
+                    ],
+                  ),
                 ),
-              ],
+              ),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
             ),
           ),
         ),
       ),
+      body: Stack(
+        children: [
+          AnimatedBlob(
+            color: themeProvider.primaryColor.withOpacity(0.08),
+            offset: const Offset(-100, 100),
+            size: 300,
+          ),
+          AnimatedBlob(
+            color: themeProvider.secondaryColor.withOpacity(0.08),
+            offset: const Offset(200, 500),
+            size: 400,
+          ),
+          Container(
+            color: Colors.white.withOpacity(0.6),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  EntranceFader(
+                    delay: 0,
+                    child: _buildSettingsTile(
+                      context: context,
+                      title: 'Change Password',
+                      icon: Icons.lock_reset,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChangePasswordScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  EntranceFader(
+                    delay: 200,
+                    child: _buildSettingsTile(
+                      context: context,
+                      title: 'Delete Account',
+                      icon: Icons.delete_forever_outlined,
+                      isDestructive: true,
+                      onTap: _showDeleteAccountConfirmationDialog,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
-
-
 
   void _showDeleteAccountConfirmationDialog() {
     showDialog(
@@ -209,61 +247,83 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSettingsTile({
+    required BuildContext context,
     required String title,
     required IconData icon,
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isDestructive
-                        ? Colors.redAccent.withOpacity(0.2)
-                        : Colors.white.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isDestructive ? Colors.redAccent : Colors.white,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      color: isDestructive ? Colors.redAccent : Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white.withOpacity(0.3),
-                  size: 16,
-                ),
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final primaryColor = isDestructive ? Colors.redAccent : themeProvider.primaryColor;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                primaryColor.withOpacity(0.85),
+                primaryColor.withOpacity(0.6),
               ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: primaryColor.withOpacity(0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(24),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        icon,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.white70,
+                      size: 16,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

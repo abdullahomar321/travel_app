@@ -60,10 +60,9 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Add Family Member', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.transparent,
+        backgroundColor: themeProvider.primaryColor,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -72,61 +71,73 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
         ),
       ),
       body: Container(
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [themeProvider.primaryColor, themeProvider.secondaryColor],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+        color: Colors.white,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(top: kToolbarHeight + 40, left: 20, right: 20, bottom: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 30), // Added spacing
-              ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+              Text(
+                'Enter Member Details',
+                style: TextStyle(
+                  color: themeProvider.primaryColor,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Complete the form below to add a new member to your family list.',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 32),
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _buildThemedTextField(
+                      _nameController, 
+                      "Full Name", 
+                      Icons.person_outline, 
+                      themeProvider.primaryColor
                     ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildGlassTextField(_nameController, "Full Name", Icons.person),
-                          const SizedBox(height: 16),
-                          _buildGlassTextField(_ageController, "Age", Icons.calendar_today, isNumber: true),
-                          const SizedBox(height: 16),
-                          _buildGlassTextField(_relationController, "Relation (e.g., Brother)", Icons.favorite_border),
-                          const SizedBox(height: 32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _saveFamilyMember,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: themeProvider.primaryColor,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                elevation: 0,
-                              ),
-                              child: _isLoading 
-                                ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: themeProvider.primaryColor))
-                                : const Text('SAVE MEMBER', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 20),
+                    _buildThemedTextField(
+                      _ageController, 
+                      "Age", 
+                      Icons.calendar_today_outlined, 
+                      themeProvider.primaryColor, 
+                      isNumber: true
+                    ),
+                    const SizedBox(height: 20),
+                    _buildThemedTextField(
+                      _relationController, 
+                      "Relation (e.g., Brother)", 
+                      Icons.favorite_border, 
+                      themeProvider.primaryColor
+                    ),
+                    const SizedBox(height: 40),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _saveFamilyMember,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: themeProvider.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 4,
+                          shadowColor: themeProvider.primaryColor.withOpacity(0.4),
+                        ),
+                        child: _isLoading 
+                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : const Text('SAVE MEMBER', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],
@@ -136,29 +147,36 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
     );
   }
 
-  Widget _buildGlassTextField(TextEditingController controller, String label, IconData icon, {bool isNumber = false}) {
+  Widget _buildThemedTextField(TextEditingController controller, String label, IconData icon, Color primaryColor, {bool isNumber = false}) {
     return TextFormField(
       controller: controller,
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.black87),
       validator: (value) {
         if (value == null || value.isEmpty) return 'Please enter $label';
         return null;
       },
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-        prefixIcon: Icon(icon, color: Colors.white.withOpacity(0.7)),
+        labelStyle: TextStyle(color: primaryColor.withOpacity(0.7)),
+        prefixIcon: Icon(icon, color: primaryColor.withOpacity(0.7)),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        fillColor: Colors.grey[50],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16), 
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16), 
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16), 
-          borderSide: const BorderSide(color: Colors.white),
+          borderSide: BorderSide(color: primaryColor, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16), 
+          borderSide: const BorderSide(color: Colors.redAccent),
         ),
       ),
     );

@@ -72,6 +72,7 @@ class DocumentService {
         'issueDate': Timestamp.fromDate(issueDate),
         'expiryDate': Timestamp.fromDate(expiryDate),
         'imagePath': imagePath ?? '',
+        'isDeleted': false, // Add isDeleted flag
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
@@ -96,6 +97,7 @@ class DocumentService {
     }
   }
 
+  /// Get documents for a specific member (active only, ordered by recent)
   static Stream<List<Map<String, dynamic>>> getMemberDocumentsStream({
     required String userId,
     required String memberId,
@@ -106,7 +108,8 @@ class DocumentService {
         .collection('familymembers')
         .doc(memberId)
         .collection('documents')
-        .orderBy('createdAt', descending: true)
+        .where('isDeleted', isEqualTo: false) // Only active documents
+        .orderBy('createdAt', descending: true) // Most recent first
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
@@ -125,6 +128,7 @@ class DocumentService {
     });
   }
 
+  /// Get all active documents across all members (ordered by recent)
   static Future<List<Map<String, dynamic>>> getAllUserDocuments({
     required String userId,
   }) async {
@@ -133,6 +137,7 @@ class DocumentService {
           .collection('users')
           .doc(userId)
           .collection('familymembers')
+          .where('isDeleted', isEqualTo: false) // Only active members
           .get();
 
       List<Map<String, dynamic>> allDocuments = [];
@@ -140,7 +145,7 @@ class DocumentService {
       for (var memberDoc in membersSnapshot.docs) {
         final documentsSnapshot = await memberDoc.reference
             .collection('documents')
-            .orderBy('createdAt', descending: true)
+            .where('isDeleted', isEqualTo: false) // Only active documents
             .get();
 
         for (var doc in documentsSnapshot.docs) {
@@ -154,16 +159,58 @@ class DocumentService {
           if (data['expiryDate'] is Timestamp) {
             data['expiryDateParsed'] = (data['expiryDate'] as Timestamp).toDate();
           }
+          if (data['createdAt'] is Timestamp) {
+            data['createdAtParsed'] = (data['createdAt'] as Timestamp).toDate();
+          }
 
           allDocuments.add(data);
         }
       }
+
+      // Sort by createdAt (most recent first)
+      allDocuments.sort((a, b) {
+        final aDate = a['createdAt'] as Timestamp?;
+        final bDate = b['createdAt'] as Timestamp?;
+        if (aDate == null || bDate == null) return 0;
+        return bDate.compareTo(aDate); // Descending order
+      });
 
       return allDocuments;
     } catch (e) {
       print('Error getting all user documents: $e');
       return [];
     }
+  }
+
+  /// Get deleted documents for a specific member
+  static Stream<List<Map<String, dynamic>>> getDeletedMemberDocumentsStream({
+    required String userId,
+    required String memberId,
+  }) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('familymembers')
+        .doc(memberId)
+        .collection('documents')
+        .where('isDeleted', isEqualTo: true)
+        .orderBy('deletedAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+
+        if (data['issueDate'] is Timestamp) {
+          data['issueDateParsed'] = (data['issueDate'] as Timestamp).toDate();
+        }
+        if (data['expiryDate'] is Timestamp) {
+          data['expiryDateParsed'] = (data['expiryDate'] as Timestamp).toDate();
+        }
+
+        return data;
+      }).toList();
+    });
   }
 
   static Future<String> updateDocument({
@@ -190,7 +237,6 @@ class DocumentService {
         updates['expiryDate'] = Timestamp.fromDate(expiryDate);
       }
 
-      // Save new image locally if provided
       if (newImageFile != null) {
         final memberDoc = await _firestore
             .collection('users')
@@ -229,7 +275,61 @@ class DocumentService {
     }
   }
 
+  /// Soft delete a document
   static Future<String> deleteDocument({
+    required String userId,
+    required String memberId,
+    required String documentId,
+  }) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('familymembers')
+          .doc(memberId)
+          .collection('documents')
+          .doc(documentId)
+          .update({
+        'isDeleted': true,
+        'deletedAt': FieldValue.serverTimestamp(),
+      });
+
+      return "Document moved to trash";
+    } catch (e) {
+      print('Error deleting document: $e');
+      return "Failed to delete document: $e";
+    }
+  }
+
+  /// Restore a soft-deleted document
+  static Future<String> restoreDocument({
+    required String userId,
+    required String memberId,
+    required String documentId,
+  }) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('familymembers')
+          .doc(memberId)
+          .collection('documents')
+          .doc(documentId)
+          .update({
+        'isDeleted': false,
+        'deletedAt': FieldValue.delete(),
+        'restoredAt': FieldValue.serverTimestamp(),
+      });
+
+      return "Document restored successfully";
+    } catch (e) {
+      print('Error restoring document: $e');
+      return "Failed to restore document: $e";
+    }
+  }
+
+  /// Permanently delete a document
+  static Future<String> permanentlyDeleteDocument({
     required String userId,
     required String memberId,
     required String documentId,
@@ -260,13 +360,14 @@ class DocumentService {
         }
       }
 
-      return "Document deleted successfully";
+      return "Document permanently deleted";
     } catch (e) {
-      print('Error deleting document: $e');
-      return "Failed to delete document: $e";
+      print('Error permanently deleting document: $e');
+      return "Failed to permanently delete document: $e";
     }
   }
 
+  /// Get active document count for a member
   static Future<int> getMemberDocumentCount({
     required String userId,
     required String memberId,
@@ -278,12 +379,36 @@ class DocumentService {
           .collection('familymembers')
           .doc(memberId)
           .collection('documents')
+          .where('isDeleted', isEqualTo: false)
           .count()
           .get();
 
       return snapshot.count ?? 0;
     } catch (e) {
       print('Error getting document count: $e');
+      return 0;
+    }
+  }
+
+  /// Get deleted document count for a member
+  static Future<int> getDeletedDocumentCount({
+    required String userId,
+    required String memberId,
+  }) async {
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('familymembers')
+          .doc(memberId)
+          .collection('documents')
+          .where('isDeleted', isEqualTo: true)
+          .count()
+          .get();
+
+      return snapshot.count ?? 0;
+    } catch (e) {
+      print('Error getting deleted document count: $e');
       return 0;
     }
   }
